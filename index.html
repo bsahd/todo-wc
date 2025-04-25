@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>UI Animation (WC implementation)</title>
+		<link rel="stylesheet" href="index.css" />
+		<script src="index.js" defer></script>
+	</head>
+
+	<body>
+		<main>
+			<h1>Todo with animation in WC</h1>
+			<p>No bundle. No minify. Just DOM(including Custom Element).</p>
+			<label>add:<input id="textinelem" /></label>
+			<div id="todo">
+				<todo-item text="カスタム要素はReactをぶっ壊す"
+					>カスタム要素はReactをぶっ壊す</todo-item
+				>
+				<todo-item text="ポストReact時代、到来">ポストReact時代、到来</todo-item>
+			</div>
+		</main>
+		<div id="toast"></div>
+		<footer>
+			<button type="button" id="clearall">Clear all</button>
+			<button type="button" id="addmany">Add many</button>
+		</footer>
+	</body>
+</html>

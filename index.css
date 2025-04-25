@@ -1,0 +1,141 @@
+* {
+	box-sizing: border-box;
+}
+@keyframes insert {
+	0% {
+		height: 0;
+		opacity: 0;
+		filter: blur(4px);
+	}
+
+	100% {
+		height: 1lh;
+		opacity: 1;
+		filter: none;
+	}
+}
+
+@keyframes toast {
+	0% {
+		translate: 0 100%;
+		opacity: 0;
+		filter: blur(4px);
+	}
+
+	100% {
+		translate: 0 0;
+		opacity: 1;
+		filter: none;
+	}
+}
+
+@keyframes movedown {
+	0% {
+		translate: 0 0;
+	}
+
+	50% {
+		opacity: 0.5;
+		/*filter: blur(4px);*/
+	}
+
+	100% {
+		translate: 0 100%;
+	}
+}
+@keyframes moveup {
+	0% {
+		translate: 0 0;
+	}
+
+	50% {
+		opacity: 0.5;
+		/*filter: blur(4px);*/
+	}
+
+	100% {
+		translate: 0 -100%;
+	}
+}
+
+todo-item {
+	display: block;
+}
+@media (prefers-reduced-motion: no-preference) {
+	todo-item.insert {
+		animation: 500ms ease 0s 1 insert normal;
+		pointer-events: none;
+	}
+
+	todo-item.remove {
+		animation: 500ms ease 0s 1 insert reverse;
+		height: 0;
+		opacity: 0;
+		pointer-events: none;
+	}
+	todo-item.movedown {
+		animation: 500ms ease 0s 1 movedown normal;
+	}
+	todo-item.moveup {
+		animation: 500ms ease 0s 1 moveup normal;
+	}
+	toast-item.insert {
+		animation: 500ms ease 0s 1 toast normal;
+	}
+	toast-item.remove {
+		animation: 500ms ease 0s 1 toast reverse;
+	}
+}
+.dialog.hide {
+	animation: 500ms ease-out 0s 1 dialogclose normal;
+	pointer-events: none;
+}
+
+button {
+	height: 1rlh;
+	color: #024;
+	border: 1px solid #08f;
+	font-size: 14px;
+	background-color: #08f2;
+}
+
+#toast {
+	position: fixed;
+	bottom: 8px;
+	right: 8px;
+}
+
+toast-item {
+	display: block;
+
+	background: #fff4;
+	border-radius: 8px;
+	backdrop-filter: blur(4px);
+	box-shadow: 0 2px 15px rgba(0, 0, 0, 0.25);
+	padding: 8px;
+}
+body {
+	--body-bg: #fff;
+	font-family: sans-serif;
+}
+.dragt {
+	border-top: 2px solid #08f;
+	margin-top: -2px;
+}
+@media (prefers-color-scheme: dark) {
+	body {
+		color: #eef;
+		background-color: #012;
+		--body-bg: #012;
+	}
+
+	dialog-box,
+	toast-item {
+		background: #0244;
+		box-shadow: 0 2px 15px rgba(255, 255, 255, 0.25);
+	}
+
+	button {
+		color: #fff;
+	}
+}
