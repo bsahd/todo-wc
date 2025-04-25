@@ -147,7 +147,8 @@ customElements.define(
 					},
 					"↓"
 				),
-				h("label", {}, this.checkelem, this.textelem)
+				this.checkelem,
+				this.textelem
 			);
 			this.addEventListener(
 				"dragenter",
@@ -200,7 +201,7 @@ customElements.define(
 			gevent.on(
 				"removechecked",
 				() => {
-					if(this.done){
+					if (this.done) {
 						this.remove();
 					}
 				},
@@ -239,7 +240,7 @@ customElements.define(
 		}
 
 		set text(text) {
-			return this.setAttribute("text", text);
+			this.setAttribute("text", text);
 		}
 
 		get done() {
@@ -247,7 +248,7 @@ customElements.define(
 		}
 
 		set done(done) {
-			return this.setAttribute("done", done);
+			this.setAttribute("done", done);
 		}
 
 		async insert() {
