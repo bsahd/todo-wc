@@ -5,7 +5,7 @@ function h(tagName, attributes = {}, ...childrens) {
 			for (const [eventName, eventListener] of Object.entries(attributeData)) {
 				element.addEventListener(eventName, eventListener);
 			}
-		} else {
+		} else if (attributeData !== null) {
 			element.setAttribute(attributeName, attributeData);
 		}
 	}
@@ -14,15 +14,20 @@ function h(tagName, attributes = {}, ...childrens) {
 }
 
 class MyEventEmitter {
+	/**@type {{[x in string]:function[]}} */
+	listeners;
 	constructor() {
 		this.listeners = {};
 	}
 
-	on(event, listener) {
+	on(event, listener, signal) {
 		if (!this.listeners[event]) {
 			this.listeners[event] = [];
 		}
 		this.listeners[event].push(listener);
+		signal?.addEventListener("abort", () => {
+			this.listeners[event].splice(this.listeners[event].indexOf(listener));
+		});
 	}
 
 	emit(event, ...args) {
@@ -33,10 +38,7 @@ class MyEventEmitter {
 	}
 
 	off(event, listenerToRemove) {
-		const listeners = this.listeners[event];
-		if (listeners) {
-			this.listeners[event] = listeners.filter((listener) => listener !== listenerToRemove);
-		}
+		this.listeners[event].splice(this.listeners[event].indexOf(listenerToRemove));
 	}
 }
 
@@ -60,9 +62,10 @@ document.getElementById("clearall").addEventListener("click", () => {
 	window.scrollTo({ top: 0 });
 	gevent.emit("allclear");
 });
-document.getElementById("addmany").addEventListener("click", () => {
-	new Array(128).fill(null).forEach((_, a) => gevent.emit("addtodo", "elem #" + a));
+document.getElementById("clearchecked").addEventListener("click", () => {
+	gevent.emit("removechecked");
 });
+
 function delay(s) {
 	if (s == 0) {
 		return;
@@ -72,11 +75,12 @@ function delay(s) {
 customElements.define(
 	"todo-item",
 	class extends HTMLElement {
-		static observedAttributes = ["text"];
+		static observedAttributes = ["text", "done"];
 		constructor() {
 			super();
 		}
 		connectedCallback() {
+			this.disconnectAbort = new AbortController();
 			this.innerHTML = "";
 			this.textelem = h(
 				"span",
@@ -111,8 +115,17 @@ customElements.define(
 					},
 					tabindex: 0,
 				},
-				this.text,
+				this.text
 			);
+			this.checkelem = h("input", {
+				type: "checkbox",
+				listeners: {
+					change: (e) => {
+						this.done = e.target.checked;
+					},
+				},
+				checked: this.done ? "on" : null,
+			});
 			this.append(
 				h(
 					"button",
@@ -122,7 +135,7 @@ customElements.define(
 							click: this.btnUpDownClick.bind(this, true),
 						},
 					},
-					"↑",
+					"↑"
 				),
 				h(
 					"button",
@@ -132,42 +145,76 @@ customElements.define(
 							click: this.btnUpDownClick.bind(this, false),
 						},
 					},
-					"↓",
+					"↓"
 				),
-				this.textelem,
+				h("label", {}, this.checkelem, this.textelem)
 			);
-			this.addEventListener("dragenter", (event) => {
-				event.preventDefault();
-				this.classList.add("dragt");
-			});
-			this.addEventListener("dragover", (event) => {
-				event.preventDefault();
-			});
-			this.addEventListener("dragleave", (event) => {
-				event.preventDefault();
-				this.classList.remove("dragt");
-			});
-			this.addEventListener("drop", (event) => {
-				event.preventDefault();
-				const data = event.dataTransfer.getData("text/plain");
-				this.classList.remove("dragt");
-				this.dragdrop(data);
-			});
-			this.addEventListener("dragstart", (event) =>
-				event.dataTransfer.setData("text/plain", this.text),
+			this.addEventListener(
+				"dragenter",
+				(event) => {
+					event.preventDefault();
+					this.classList.add("dragt");
+				},
+				{ signal: this.disconnectAbort.signal }
+			);
+			this.addEventListener(
+				"dragover",
+				(event) => {
+					event.preventDefault();
+				},
+				{ signal: this.disconnectAbort.signal }
+			);
+			this.addEventListener(
+				"dragleave",
+				(event) => {
+					event.preventDefault();
+					this.classList.remove("dragt");
+				},
+				{ signal: this.disconnectAbort.signal }
+			);
+			this.addEventListener(
+				"drop",
+				(event) => {
+					event.preventDefault();
+					const data = event.dataTransfer.getData("text/plain");
+					this.classList.remove("dragt");
+					this.dragdrop(data);
+				},
+				{ signal: this.disconnectAbort.signal }
+			);
+			this.addEventListener(
+				"dragstart",
+				(event) => event.dataTransfer.setData("text/plain", this.text),
+				{ signal: this.disconnectAbort.signal }
 			);
 
 			this.setAttribute("draggable", "true");
 			gevent.emit("toast", `connecting todo ${this.text}`);
-			gevent.on("allclear", this.removebinded);
-			gevent.on("removetodo", this.removetodobinded);
-		}
-		removebinded = this.remove.bind(this);
-		removetodobinded = this.removetodo.bind(this);
-		removetodo(e) {
-			if (e == this.text) {
-				this.remove();
-			}
+			gevent.on(
+				"allclear",
+				() => {
+					this.remove();
+				},
+				this.disconnectAbort.signal
+			);
+			gevent.on(
+				"removechecked",
+				() => {
+					if(this.done){
+						this.remove();
+					}
+				},
+				this.disconnectAbort.signal
+			);
+			gevent.on(
+				"removetodo",
+				(e) => {
+					if (e == this.text) {
+						this.remove();
+					}
+				},
+				this.disconnectAbort.signal
+			);
 		}
 		dragdrop(todon) {
 			const prev = Array.from(todo.children).filter((e) => e.text == todon)[0];
@@ -195,6 +242,14 @@ customElements.define(
 			return this.setAttribute("text", text);
 		}
 
+		get done() {
+			return this.getAttribute("done");
+		}
+
+		set done(done) {
+			return this.setAttribute("done", done);
+		}
+
 		async insert() {
 			this.classList.add("insert");
 			await delay(reduceanim ? 0 : 500);
@@ -220,14 +275,16 @@ customElements.define(
 					},
 				});
 			}
+			if (name == "done" && this.checkelem) {
+				this.checkelem.checked = newValue == "true";
+			}
 			gevent.emit("toast", `todo ${this.text} attribute ${name} changed`);
 		}
 		disconnectedCallback() {
-			gevent.off("allclear", this.removebinded);
-			gevent.off("removetodo", this.removetodobinded);
+			this.disconnectAbort.abort();
 			gevent.emit("toast", `disconnected todo ${this.text}`);
 		}
-	},
+	}
 );
 customElements.define(
 	"toast-item",
@@ -250,7 +307,7 @@ customElements.define(
 			await delay(reduceanim ? 0 : 500);
 			super.remove();
 		}
-	},
+	}
 );
 function getTodoList() {
 	return Array.from(todo.children).map((e) => e.text);
