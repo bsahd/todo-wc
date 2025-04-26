@@ -44,19 +44,19 @@ class MyEventEmitter {
 }
 
 const globalEvent = new MyEventEmitter();
-globalEvent.on("toast", (e) => {
-	console.log(e);
-	toast.append(h("toast-item", {}, e));
+globalEvent.on("toast", (event) => {
+	console.log(event);
+	toast.append(h("toast-item", {}, event));
 });
 
 const todoElement = document.getElementById("todo");
 const toast = document.getElementById("toast");
 const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches;
-document.getElementById("textinelem").addEventListener("keydown", (e) => {
-	if (e.key == "Enter") {
-		e.preventDefault();
-		globalEvent.emit("addtodo", e.currentTarget.value);
-		e.currentTarget.value = "";
+document.getElementById("textinelem").addEventListener("keydown", (event) => {
+	if (event.key == "Enter") {
+		event.preventDefault();
+		globalEvent.emit("addtodo", event.currentTarget.value);
+		event.currentTarget.value = "";
 	}
 });
 document.getElementById("clearall").addEventListener("click", () => {
@@ -153,8 +153,8 @@ class TodoItemElement extends HTMLElement {
 		);
 		globalEvent.on(
 			"removetodo",
-			(e) => {
-				if (e == this.text) {
+			(event) => {
+				if (event == this.text) {
 					this.remove();
 				}
 			},
@@ -181,9 +181,9 @@ class TodoItemElement extends HTMLElement {
 						}
 						this.text = after;
 					},
-					keydown: (e) => {
-						if (e.key == "Enter") {
-							e.preventDefault();
+					keydown: (event) => {
+						if (event.key == "Enter") {
+							event.preventDefault();
 							const after = prompt("new todo", this.text);
 							if (after == this.text || after == null) {
 								return;
@@ -203,8 +203,8 @@ class TodoItemElement extends HTMLElement {
 		this.checkelem = h("input", {
 			type: "checkbox",
 			listeners: {
-				change: (e) => {
-					this.done = e.target.checked;
+				change: (event) => {
+					this.done = event.target.checked;
 				},
 			},
 			checked: this.done ? "on" : null,
@@ -235,7 +235,7 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const moveTarget = todoElement.todos.find((e) => e.text == todon);
+		const moveTarget = todoElement.todos.find((event) => event.text == todon);
 		todoElement.insertBefore(moveTarget, this);
 		globalEvent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
@@ -334,26 +334,26 @@ class ToastItemElement extends HTMLElement {
 }
 customElements.define("toast-item", ToastItemElement);
 
-globalEvent.on("addtodo", (e) => {
-	if (todoElement.todos.some((l) => l.text == e)) {
-		globalEvent.emit("toast", `error: todo ${e} exists`);
+globalEvent.on("addtodo", (event) => {
+	if (todoElement.todos.some((todoItem) => todoItem.text == event)) {
+		globalEvent.emit("toast", `error: todo ${event} exists`);
 		throw "todo exists";
 	}
-	const inselem = h("todo-item", { text: e });
+	const inselem = h("todo-item", { text: event });
 	inselem.insert();
 	todoElement.append(inselem);
 });
-globalEvent.on("removetodo", (e) => {
-	console.log(e,"removed")
+globalEvent.on("removetodo", (event) => {
+	console.log(event,"removed")
 });
-globalEvent.on("todoDoneStateChange", (e,v) => {
-	console.log(e,v,"donestatechange")
+globalEvent.on("todoDoneStateChange", (todoName,value) => {
+	console.log(todoName,value,"donestatechange")
 });
-globalEvent.on("renametodo", (e) => {
-	if (todoElement.todos.some((l) => e.after == l.text).length > 1) {
-		globalEvent.emit("toast", `error: todo ${e.after} exists`);
-		e.failcb();
+globalEvent.on("renametodo", (event) => {
+	if (todoElement.todos.some((l) => event.after == l.text).length > 1) {
+		globalEvent.emit("toast", `error: todo ${event.after} exists`);
+		event.failcb();
 		throw "todo exists";
 	}
-	e.okcb();
+	event.okcb();
 });
