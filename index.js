@@ -144,7 +144,7 @@ class TodoItemElement extends HTMLElement {
 			"removechecked",
 			() => {
 				console.log(`removechecked in "${this.text}" done:${this.done}`);
-				if (this.done=="true") {
+				if (this.done) {
 					this.remove();
 				}
 			},
@@ -231,7 +231,7 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const prev = todoEl.todos.filter((e) => e.text == todon)[0];
+		const prev = todoEl.todos.find((e) => e.text == todon);
 		todoEl.insertBefore(prev, this);
 		gevent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
@@ -256,7 +256,7 @@ class TodoItemElement extends HTMLElement {
 	}
 
 	get done() {
-		return this.getAttribute("done");
+		return this.getAttribute("done") == "true";
 	}
 
 	set done(done) {
