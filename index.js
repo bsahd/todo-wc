@@ -199,6 +199,7 @@ customElements.define(
 			gevent.on(
 				"removechecked",
 				() => {
+					console.log(`removechecked in "${this.text}" done:${this.done}`)
 					if (this.done) {
 						this.remove();
 					}
