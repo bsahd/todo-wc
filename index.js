@@ -38,7 +38,7 @@ class MyEventEmitter {
 	}
 
 	off(event, listenerToRemove) {
-		this.listeners[event].splice(this.listeners[event].indexOf(listenerToRemove));
+		this.listeners[event].splice(this.listeners[event].indexOf(listenerToRemove),1);
 	}
 }
 
