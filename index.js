@@ -49,7 +49,7 @@ gevent.on("toast", (e) => {
 	toast.append(h("toast-item", {}, e));
 });
 
-const todo = document.getElementById("todo");
+const todoEl = document.getElementById("todo");
 const toast = document.getElementById("toast");
 const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches;
 document.getElementById("textinelem").addEventListener("keydown", (e) => {
@@ -73,6 +73,17 @@ function delay(s) {
 	}
 	return new Promise((o) => setTimeout(o, s));
 }
+
+class TodoListElement extends HTMLElement{
+	constructor(){
+		super()
+	}
+	get todos(){
+		return Array.from(this.children)
+	}
+}
+customElements.define("todo-list",TodoListElement,)
+
 class TodoItemElement extends HTMLElement {
 	static observedAttributes = ["text", "done"];
 	constructor() {
@@ -220,19 +231,19 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const prev = Array.from(todo.children).filter((e) => e.text == todon)[0];
-		todo.insertBefore(prev, this);
+		const prev = Array.from(todoEl.children).filter((e) => e.text == todon)[0];
+		todoEl.insertBefore(prev, this);
 		gevent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
 	async btnUpDownClick(updown) {
 		this.classList.add(updown ? "moveup" : "movedown");
-		const preva = todo.children[Array.from(todo.children).indexOf(this) + (updown ? -1 : 1)];
+		const preva = todoEl.children[Array.from(todoEl.children).indexOf(this) + (updown ? -1 : 1)];
 		preva?.classList.add(updown ? "movedown" : "moveup");
 		await delay(reduceanim ? 0 : 500);
 		this.classList.remove(updown ? "moveup" : "movedown");
 		preva?.classList.remove(updown ? "movedown" : "moveup");
-		const prev = todo.children[Array.from(todo.children).indexOf(this) + (updown ? -1 : 2)];
-		todo.insertBefore(this, prev);
+		const prev = todoEl.children[Array.from(todoEl.children).indexOf(this) + (updown ? -1 : 2)];
+		todoEl.insertBefore(this, prev);
 		gevent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
 	}
 
@@ -310,7 +321,7 @@ class ToastItemElement extends HTMLElement {
 }
 customElements.define("toast-item", ToastItemElement);
 function getTodoList() {
-	return Array.from(todo.children).map((e) => e.text);
+	return Array.from(todoEl.children).map((e) => e.text);
 }
 
 gevent.on("addtodo", (e) => {
@@ -320,7 +331,7 @@ gevent.on("addtodo", (e) => {
 	}
 	const inselem = h("todo-item", { text: e });
 	inselem.insert();
-	todo.append(inselem);
+	todoEl.append(inselem);
 });
 gevent.on("removetodo", (e) => {});
 gevent.on("renametodo", (e) => {
