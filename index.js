@@ -1,3 +1,4 @@
+"use strict";
 function h(tagName, attributes = {}, ...childrens) {
 	var element = document.createElement(tagName);
 	for (const [attributeName, attributeData] of Object.entries(attributes)) {
