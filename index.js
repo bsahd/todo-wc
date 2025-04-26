@@ -14,8 +14,6 @@ function h(tagName, attributes = {}, ...childrens) {
 }
 
 class MyEventEmitter {
-	/**@type {{[x in string]:function[]}} */
-	listeners;
 	constructor() {
 		this.listeners = {};
 	}
