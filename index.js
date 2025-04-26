@@ -49,7 +49,7 @@ globalEvent.on("toast", (e) => {
 	toast.append(h("toast-item", {}, e));
 });
 
-const todoEl = document.getElementById("todo");
+const todoElement = document.getElementById("todo");
 const toast = document.getElementById("toast");
 const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches;
 document.getElementById("textinelem").addEventListener("keydown", (e) => {
@@ -235,21 +235,21 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const moveTarget = todoEl.todos.find((e) => e.text == todon);
-		todoEl.insertBefore(moveTarget, this);
+		const moveTarget = todoElement.todos.find((e) => e.text == todon);
+		todoElement.insertBefore(moveTarget, this);
 		globalEvent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
 	async btnUpDownClick(updown) {
 		const thisClassName = updown ? "moveup" : "movedown";
 		const animationTargetClassName = updown ? "movedown" : "moveup";
 		this.classList.add(thisClassName);
-		const animationTarget = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 1)];
+		const animationTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 1)];
 		animationTarget?.classList.add(animationTargetClassName);
 		await delay(reduceanim ? 0 : 500);
 		this.classList.remove(thisClassName);
 		animationTarget?.classList.remove(animationTargetClassName);
-		const moveTarget = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 2)];
-		todoEl.insertBefore(this, moveTarget);
+		const moveTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 2)];
+		todoElement.insertBefore(this, moveTarget);
 		globalEvent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
 	}
 
@@ -335,13 +335,13 @@ class ToastItemElement extends HTMLElement {
 customElements.define("toast-item", ToastItemElement);
 
 globalEvent.on("addtodo", (e) => {
-	if (todoEl.todos.some((l) => l.text == e)) {
+	if (todoElement.todos.some((l) => l.text == e)) {
 		globalEvent.emit("toast", `error: todo ${e} exists`);
 		throw "todo exists";
 	}
 	const inselem = h("todo-item", { text: e });
 	inselem.insert();
-	todoEl.append(inselem);
+	todoElement.append(inselem);
 });
 globalEvent.on("removetodo", (e) => {
 	console.log(e,"removed")
@@ -350,7 +350,7 @@ globalEvent.on("todoDoneStateChange", (e,v) => {
 	console.log(e,v,"donestatechange")
 });
 globalEvent.on("renametodo", (e) => {
-	if (todoEl.todos.some((l) => e.after == l.text).length > 1) {
+	if (todoElement.todos.some((l) => e.after == l.text).length > 1) {
 		globalEvent.emit("toast", `error: todo ${e.after} exists`);
 		e.failcb();
 		throw "todo exists";
