@@ -232,19 +232,21 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const prev = todoEl.todos.find((e) => e.text == todon);
-		todoEl.insertBefore(prev, this);
+		const moveTarget = todoEl.todos.find((e) => e.text == todon);
+		todoEl.insertBefore(moveTarget, this);
 		gevent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
 	async btnUpDownClick(updown) {
-		this.classList.add(updown ? "moveup" : "movedown");
-		const preva = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 1)];
-		preva?.classList.add(updown ? "movedown" : "moveup");
+		const thisClassName = updown ? "moveup" : "movedown";
+		const animationTargetClassName = updown ? "movedown" : "moveup";
+		this.classList.add(thisClassName);
+		const animationTarget = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 1)];
+		animationTarget?.classList.add(animationTargetClassName);
 		await delay(reduceanim ? 0 : 500);
-		this.classList.remove(updown ? "moveup" : "movedown");
-		preva?.classList.remove(updown ? "movedown" : "moveup");
-		const prev = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 2)];
-		todoEl.insertBefore(this, prev);
+		this.classList.remove(thisClassName);
+		animationTarget?.classList.remove(animationTargetClassName);
+		const moveTarget = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 2)];
+		todoEl.insertBefore(this, moveTarget);
 		gevent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
 	}
 
