@@ -24,7 +24,7 @@ class MyEventEmitter {
 		}
 		this.listeners[event].push(listener);
 		signal?.addEventListener("abort", () => {
-			this.listeners[event].splice(this.listeners[event].indexOf(listener));
+			this.off(event,listener)
 		});
 	}
 
@@ -199,7 +199,7 @@ customElements.define(
 			gevent.on(
 				"removechecked",
 				() => {
-					console.log(`removechecked in "${this.text}" done:${this.done}`)
+					console.log(`removechecked in "${this.text}" done:${this.done}`);
 					if (this.done) {
 						this.remove();
 					}
