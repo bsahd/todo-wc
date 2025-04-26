@@ -115,11 +115,12 @@ class TodoItemElement extends HTMLElement {
 			},
 			{ signal: this.disconnectAbort.signal }
 		);
+		const DATA_TRANSFER_TYPE = "text/plain";
 		this.addEventListener(
 			"drop",
 			(event) => {
 				event.preventDefault();
-				const data = event.dataTransfer.getData("text/plain");
+				const data = event.dataTransfer.getData(DATA_TRANSFER_TYPE);
 				this.classList.remove("dragt");
 				this.dragdrop(data);
 			},
@@ -127,7 +128,7 @@ class TodoItemElement extends HTMLElement {
 		);
 		this.addEventListener(
 			"dragstart",
-			(event) => event.dataTransfer.setData("text/plain", this.text),
+			(event) => event.dataTransfer.setData(DATA_TRANSFER_TYPE, this.text),
 			{ signal: this.disconnectAbort.signal }
 		);
 
