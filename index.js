@@ -277,19 +277,25 @@ class TodoItemElement extends HTMLElement {
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
-		if (name == "text" && this.textelem) {
-			this.textelem.innerText = newValue;
-			gevent.emit("renametodo", {
-				before: oldValue,
-				after: newValue,
-				okcb: () => {},
-				failcb: () => {
-					this.text = oldValue;
-				},
-			});
-		}
-		if (name == "done" && this.checkelem) {
-			this.checkelem.checked = newValue == "true";
+		switch (name) {
+			case "text":
+				if (this.textelem) {
+					this.textelem.innerText = newValue;
+					gevent.emit("renametodo", {
+						before: oldValue,
+						after: newValue,
+						okcb: () => {},
+						failcb: () => {
+							this.text = oldValue;
+						},
+					});
+				}
+				break;
+			case "done":
+				if (this.checkelem) {
+					this.checkelem.checked = this.done;
+				}
+				break;
 		}
 		gevent.emit("toast", `todo ${this.text} attribute ${name} changed`);
 	}
