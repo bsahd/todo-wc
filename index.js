@@ -19,12 +19,14 @@ class MyEventEmitter {
 	}
 
 	on(event, listener, signal) {
+		console.log("on");
 		if (!this.listeners[event]) {
 			this.listeners[event] = [];
 		}
 		this.listeners[event].push(listener);
 		signal?.addEventListener("abort", () => {
-			this.off(event,listener)
+			console.log("off");
+			this.off(event, listener);
 		});
 	}
 
@@ -78,7 +80,79 @@ customElements.define(
 			super();
 		}
 		connectedCallback() {
-			this.disconnectAbort = new AbortController();
+			if (!this.disconnectAbort || this.disconnectAbort.signal.aborted) {
+				this.disconnectAbort = new AbortController();
+
+				this.addEventListener(
+					"dragenter",
+					(event) => {
+						event.preventDefault();
+						this.classList.add("dragt");
+					},
+					{ signal: this.disconnectAbort.signal }
+				);
+				this.addEventListener(
+					"dragover",
+					(event) => {
+						event.preventDefault();
+					},
+					{ signal: this.disconnectAbort.signal }
+				);
+				this.addEventListener(
+					"dragleave",
+					(event) => {
+						event.preventDefault();
+						this.classList.remove("dragt");
+					},
+					{ signal: this.disconnectAbort.signal }
+				);
+				this.addEventListener(
+					"drop",
+					(event) => {
+						event.preventDefault();
+						const data = event.dataTransfer.getData("text/plain");
+						this.classList.remove("dragt");
+						this.dragdrop(data);
+					},
+					{ signal: this.disconnectAbort.signal }
+				);
+				this.addEventListener(
+					"dragstart",
+					(event) => event.dataTransfer.setData("text/plain", this.text),
+					{ signal: this.disconnectAbort.signal }
+				);
+
+				this.setAttribute("draggable", "true");
+
+				gevent.on(
+					"allclear",
+					() => {
+						this.remove();
+					},
+					this.disconnectAbort.signal
+				);
+				gevent.on(
+					"removechecked",
+					() => {
+						console.log(`removechecked in "${this.text}" done:${this.done}`);
+						if (this.done) {
+							this.remove();
+						}
+					},
+					this.disconnectAbort.signal
+				);
+				gevent.on(
+					"removetodo",
+					(e) => {
+						if (e == this.text) {
+							this.remove();
+						}
+					},
+					this.disconnectAbort.signal
+				);
+				gevent.emit("toast", `re event-register todo ${this.text}`);
+			}
+			gevent.emit("toast", `connecting todo ${this.text}`);
 			this.innerHTML = "";
 			this.textelem = h(
 				"span",
@@ -147,73 +221,6 @@ customElements.define(
 				),
 				this.checkelem,
 				this.textelem
-			);
-			this.addEventListener(
-				"dragenter",
-				(event) => {
-					event.preventDefault();
-					this.classList.add("dragt");
-				},
-				{ signal: this.disconnectAbort.signal }
-			);
-			this.addEventListener(
-				"dragover",
-				(event) => {
-					event.preventDefault();
-				},
-				{ signal: this.disconnectAbort.signal }
-			);
-			this.addEventListener(
-				"dragleave",
-				(event) => {
-					event.preventDefault();
-					this.classList.remove("dragt");
-				},
-				{ signal: this.disconnectAbort.signal }
-			);
-			this.addEventListener(
-				"drop",
-				(event) => {
-					event.preventDefault();
-					const data = event.dataTransfer.getData("text/plain");
-					this.classList.remove("dragt");
-					this.dragdrop(data);
-				},
-				{ signal: this.disconnectAbort.signal }
-			);
-			this.addEventListener(
-				"dragstart",
-				(event) => event.dataTransfer.setData("text/plain", this.text),
-				{ signal: this.disconnectAbort.signal }
-			);
-
-			this.setAttribute("draggable", "true");
-			gevent.emit("toast", `connecting todo ${this.text}`);
-			gevent.on(
-				"allclear",
-				() => {
-					this.remove();
-				},
-				this.disconnectAbort.signal
-			);
-			gevent.on(
-				"removechecked",
-				() => {
-					console.log(`removechecked in "${this.text}" done:${this.done}`);
-					if (this.done) {
-						this.remove();
-					}
-				},
-				this.disconnectAbort.signal
-			);
-			gevent.on(
-				"removetodo",
-				(e) => {
-					if (e == this.text) {
-						this.remove();
-					}
-				},
-				this.disconnectAbort.signal
 			);
 		}
 		dragdrop(todon) {
