@@ -67,11 +67,11 @@ document.getElementById("clearchecked").addEventListener("click", () => {
 	gevent.emit("removechecked");
 });
 
-function delay(s) {
-	if (s == 0) {
+function delay(timems) {
+	if (timems == 0) {
 		return;
 	}
-	return new Promise((o) => setTimeout(o, s));
+	return new Promise((resolve,reject) => setTimeout(resolve, timems));
 }
 
 class TodoListElement extends HTMLElement{
