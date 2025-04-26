@@ -144,7 +144,7 @@ class TodoItemElement extends HTMLElement {
 			"removechecked",
 			() => {
 				console.log(`removechecked in "${this.text}" done:${this.done}`);
-				if (this.done) {
+				if (this.done=="true") {
 					this.remove();
 				}
 			},
