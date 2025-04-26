@@ -301,6 +301,7 @@ class TodoItemElement extends HTMLElement {
 				if (this.checkelem) {
 					this.checkelem.checked = this.done;
 				}
+				gevent.emit("todoDoneStateChange", this.text,this.done);
 				break;
 		}
 		gevent.emit("toast", `todo ${this.text} attribute ${name} changed`);
@@ -342,7 +343,12 @@ gevent.on("addtodo", (e) => {
 	inselem.insert();
 	todoEl.append(inselem);
 });
-gevent.on("removetodo", (e) => {});
+gevent.on("removetodo", (e) => {
+	console.log(e,"removed")
+});
+gevent.on("todoDoneStateChange", (e,v) => {
+	console.log(e,v,"donestatechange")
+});
 gevent.on("renametodo", (e) => {
 	if (todoEl.todos.some((l) => e.after == l.text).length > 1) {
 		gevent.emit("toast", `error: todo ${e.after} exists`);
