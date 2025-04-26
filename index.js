@@ -231,18 +231,18 @@ class TodoItemElement extends HTMLElement {
 		);
 	}
 	dragdrop(todon) {
-		const prev = Array.from(todoEl.children).filter((e) => e.text == todon)[0];
+		const prev = todoEl.todos.filter((e) => e.text == todon)[0];
 		todoEl.insertBefore(prev, this);
 		gevent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
 	async btnUpDownClick(updown) {
 		this.classList.add(updown ? "moveup" : "movedown");
-		const preva = todoEl.children[Array.from(todoEl.children).indexOf(this) + (updown ? -1 : 1)];
+		const preva = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 1)];
 		preva?.classList.add(updown ? "movedown" : "moveup");
 		await delay(reduceanim ? 0 : 500);
 		this.classList.remove(updown ? "moveup" : "movedown");
 		preva?.classList.remove(updown ? "movedown" : "moveup");
-		const prev = todoEl.children[Array.from(todoEl.children).indexOf(this) + (updown ? -1 : 2)];
+		const prev = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 2)];
 		todoEl.insertBefore(this, prev);
 		gevent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
 	}
@@ -320,12 +320,9 @@ class ToastItemElement extends HTMLElement {
 	}
 }
 customElements.define("toast-item", ToastItemElement);
-function getTodoList() {
-	return Array.from(todoEl.children).map((e) => e.text);
-}
 
 gevent.on("addtodo", (e) => {
-	if (getTodoList().includes(e)) {
+	if (todoEl.todos.some(l=>l.text==e)) {
 		gevent.emit("toast", `error: todo ${e} exists`);
 		throw "todo exists";
 	}
@@ -335,7 +332,7 @@ gevent.on("addtodo", (e) => {
 });
 gevent.on("removetodo", (e) => {});
 gevent.on("renametodo", (e) => {
-	if (getTodoList().filter((l) => e.after == l).length > 1) {
+	if (todoEl.todos.some((l) => e.after == l.text).length > 1) {
 		gevent.emit("toast", `error: todo ${e.after} exists`);
 		e.failcb();
 		throw "todo exists";
