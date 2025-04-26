@@ -161,6 +161,9 @@ class TodoItemElement extends HTMLElement {
 			this.disconnectAbort.signal
 		);
 		gevent.emit("toast", `connecting todo ${this.text}`);
+		this.createUserInterface();
+	}
+	createUserInterface() {
 		this.innerHTML = "";
 		this.textelem = h(
 			"span",
