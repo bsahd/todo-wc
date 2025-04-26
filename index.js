@@ -43,8 +43,8 @@ class MyEventEmitter {
 	}
 }
 
-const gevent = new MyEventEmitter();
-gevent.on("toast", (e) => {
+const globalEvent = new MyEventEmitter();
+globalEvent.on("toast", (e) => {
 	console.log(e);
 	toast.append(h("toast-item", {}, e));
 });
@@ -55,16 +55,16 @@ const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matche
 document.getElementById("textinelem").addEventListener("keydown", (e) => {
 	if (e.key == "Enter") {
 		e.preventDefault();
-		gevent.emit("addtodo", e.currentTarget.value);
+		globalEvent.emit("addtodo", e.currentTarget.value);
 		e.currentTarget.value = "";
 	}
 });
 document.getElementById("clearall").addEventListener("click", () => {
 	window.scrollTo({ top: 0 });
-	gevent.emit("allclear");
+	globalEvent.emit("allclear");
 });
 document.getElementById("clearchecked").addEventListener("click", () => {
-	gevent.emit("removechecked");
+	globalEvent.emit("removechecked");
 });
 
 function delay(timems) {
@@ -134,14 +134,14 @@ class TodoItemElement extends HTMLElement {
 
 		this.setAttribute("draggable", "true");
 
-		gevent.on(
+		globalEvent.on(
 			"allclear",
 			() => {
 				this.remove();
 			},
 			this.disconnectAbort.signal
 		);
-		gevent.on(
+		globalEvent.on(
 			"removechecked",
 			() => {
 				console.log(`removechecked in "${this.text}" done:${this.done}`);
@@ -151,7 +151,7 @@ class TodoItemElement extends HTMLElement {
 			},
 			this.disconnectAbort.signal
 		);
-		gevent.on(
+		globalEvent.on(
 			"removetodo",
 			(e) => {
 				if (e == this.text) {
@@ -160,7 +160,7 @@ class TodoItemElement extends HTMLElement {
 			},
 			this.disconnectAbort.signal
 		);
-		gevent.emit("toast", `connecting todo ${this.text}`);
+		globalEvent.emit("toast", `connecting todo ${this.text}`);
 		this.createUserInterface();
 	}
 	createUserInterface() {
@@ -175,7 +175,7 @@ class TodoItemElement extends HTMLElement {
 							return;
 						}
 						if (after == "") {
-							gevent.emit("removetodo", this.text);
+							globalEvent.emit("removetodo", this.text);
 
 							return;
 						}
@@ -189,7 +189,7 @@ class TodoItemElement extends HTMLElement {
 								return;
 							}
 							if (after == "") {
-								gevent.emit("removetodo", this.text);
+								globalEvent.emit("removetodo", this.text);
 								return;
 							}
 							this.text = after;
@@ -237,7 +237,7 @@ class TodoItemElement extends HTMLElement {
 	dragdrop(todon) {
 		const moveTarget = todoEl.todos.find((e) => e.text == todon);
 		todoEl.insertBefore(moveTarget, this);
-		gevent.emit("toast", `moving todo ${todon} to before ${this.text}`);
+		globalEvent.emit("toast", `moving todo ${todon} to before ${this.text}`);
 	}
 	async btnUpDownClick(updown) {
 		const thisClassName = updown ? "moveup" : "movedown";
@@ -250,7 +250,7 @@ class TodoItemElement extends HTMLElement {
 		animationTarget?.classList.remove(animationTargetClassName);
 		const moveTarget = todoEl.todos[todoEl.todos.indexOf(this) + (updown ? -1 : 2)];
 		todoEl.insertBefore(this, moveTarget);
-		gevent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
+		globalEvent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
 	}
 
 	get text() {
@@ -276,7 +276,7 @@ class TodoItemElement extends HTMLElement {
 	}
 
 	async remove() {
-		gevent.emit("toast", `removing todo ${this.text}`);
+		globalEvent.emit("toast", `removing todo ${this.text}`);
 		this.classList.add("remove");
 		await delay(reduceanim ? 0 : 500);
 		super.remove();
@@ -287,7 +287,7 @@ class TodoItemElement extends HTMLElement {
 			case "text":
 				if (this.textelem) {
 					this.textelem.innerText = newValue;
-					gevent.emit("renametodo", {
+					globalEvent.emit("renametodo", {
 						before: oldValue,
 						after: newValue,
 						okcb: () => {},
@@ -301,14 +301,14 @@ class TodoItemElement extends HTMLElement {
 				if (this.checkelem) {
 					this.checkelem.checked = this.done;
 				}
-				gevent.emit("todoDoneStateChange", this.text,this.done);
+				globalEvent.emit("todoDoneStateChange", this.text,this.done);
 				break;
 		}
-		gevent.emit("toast", `todo ${this.text} attribute ${name} changed`);
+		globalEvent.emit("toast", `todo ${this.text} attribute ${name} changed`);
 	}
 	disconnectedCallback() {
 		this.disconnectAbort.abort();
-		gevent.emit("toast", `disconnected todo ${this.text}`);
+		globalEvent.emit("toast", `disconnected todo ${this.text}`);
 	}
 }
 customElements.define("todo-item", TodoItemElement);
@@ -334,24 +334,24 @@ class ToastItemElement extends HTMLElement {
 }
 customElements.define("toast-item", ToastItemElement);
 
-gevent.on("addtodo", (e) => {
+globalEvent.on("addtodo", (e) => {
 	if (todoEl.todos.some((l) => l.text == e)) {
-		gevent.emit("toast", `error: todo ${e} exists`);
+		globalEvent.emit("toast", `error: todo ${e} exists`);
 		throw "todo exists";
 	}
 	const inselem = h("todo-item", { text: e });
 	inselem.insert();
 	todoEl.append(inselem);
 });
-gevent.on("removetodo", (e) => {
+globalEvent.on("removetodo", (e) => {
 	console.log(e,"removed")
 });
-gevent.on("todoDoneStateChange", (e,v) => {
+globalEvent.on("todoDoneStateChange", (e,v) => {
 	console.log(e,v,"donestatechange")
 });
-gevent.on("renametodo", (e) => {
+globalEvent.on("renametodo", (e) => {
 	if (todoEl.todos.some((l) => e.after == l.text).length > 1) {
-		gevent.emit("toast", `error: todo ${e.after} exists`);
+		globalEvent.emit("toast", `error: todo ${e.after} exists`);
 		e.failcb();
 		throw "todo exists";
 	}
