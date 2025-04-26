@@ -71,18 +71,18 @@ function delay(timems) {
 	if (timems == 0) {
 		return;
 	}
-	return new Promise((resolve,reject) => setTimeout(resolve, timems));
+	return new Promise((resolve, reject) => setTimeout(resolve, timems));
 }
 
-class TodoListElement extends HTMLElement{
-	constructor(){
-		super()
+class TodoListElement extends HTMLElement {
+	constructor() {
+		super();
 	}
-	get todos(){
-		return Array.from(this.children)
+	get todos() {
+		return Array.from(this.children);
 	}
 }
-customElements.define("todo-list",TodoListElement,)
+customElements.define("todo-list", TodoListElement);
 
 class TodoItemElement extends HTMLElement {
 	static observedAttributes = ["text", "done"];
@@ -322,7 +322,7 @@ class ToastItemElement extends HTMLElement {
 customElements.define("toast-item", ToastItemElement);
 
 gevent.on("addtodo", (e) => {
-	if (todoEl.todos.some(l=>l.text==e)) {
+	if (todoEl.todos.some((l) => l.text == e)) {
 		gevent.emit("toast", `error: todo ${e} exists`);
 		throw "todo exists";
 	}
