@@ -58,7 +58,8 @@
 	}
 }
 
-todo-item,todo-list {
+todo-item,
+todo-list {
 	display: block;
 }
 @media (prefers-reduced-motion: no-preference) {

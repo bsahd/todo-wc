@@ -76,15 +76,17 @@
 		</style>
 		<script>
 			const dialog = document.getElementById("dialog");
-			document.getElementById("closeBtn").addEventListener("click", function () {
-				dialog.classList.add("hide");
+			document
+				.getElementById("closeBtn")
+				.addEventListener("click", function () {
+					dialog.classList.add("hide");
 
-				setTimeout(() => {
-					dialog.style.display = "none"; // 完全に非表示にする
-					dialog.classList.remove("hide");
-					setTimeout(showDialog, 1000);
-				}, 500);
-			});
+					setTimeout(() => {
+						dialog.style.display = "none"; // 完全に非表示にする
+						dialog.classList.remove("hide");
+						setTimeout(showDialog, 1000);
+					}, 500);
+				});
 			function showDialog() {
 				dialog.classList.add("show");
 				dialog.style.display = "block";
@@ -97,7 +99,10 @@
 			inselem.classList.add("insert");
 			inselem.innerText = "dave";
 			setTimeout(() => {
-				document.body.insertBefore(inselem, document.getElementById("insertBefore"));
+				document.body.insertBefore(
+					inselem,
+					document.getElementById("insertBefore"),
+				);
 				setTimeout(() => {
 					inselem.classList.remove("insert");
 					setTimeout(() => {

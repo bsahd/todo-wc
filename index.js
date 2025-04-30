@@ -39,7 +39,10 @@ class MyEventEmitter {
 	}
 
 	off(event, listenerToRemove) {
-		this.listeners[event].splice(this.listeners[event].indexOf(listenerToRemove), 1);
+		this.listeners[event].splice(
+			this.listeners[event].indexOf(listenerToRemove),
+			1,
+		);
 	}
 }
 
@@ -51,7 +54,9 @@ globalEvent.on("toast", (event) => {
 
 const todoElement = document.getElementById("todo");
 const toast = document.getElementById("toast");
-const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches;
+const reduceanim = window.matchMedia(
+	`(prefers-reduced-motion: reduce)`,
+)?.matches;
 document.getElementById("textinelem").addEventListener("keydown", (event) => {
 	if (event.key == "Enter") {
 		event.preventDefault();
@@ -98,14 +103,14 @@ class TodoItemElement extends HTMLElement {
 				event.preventDefault();
 				this.classList.add("dragt");
 			},
-			{ signal: this.disconnectAbort.signal }
+			{ signal: this.disconnectAbort.signal },
 		);
 		this.addEventListener(
 			"dragover",
 			(event) => {
 				event.preventDefault();
 			},
-			{ signal: this.disconnectAbort.signal }
+			{ signal: this.disconnectAbort.signal },
 		);
 		this.addEventListener(
 			"dragleave",
@@ -113,7 +118,7 @@ class TodoItemElement extends HTMLElement {
 				event.preventDefault();
 				this.classList.remove("dragt");
 			},
-			{ signal: this.disconnectAbort.signal }
+			{ signal: this.disconnectAbort.signal },
 		);
 		const DATA_TRANSFER_TYPE = "text/plain";
 		this.addEventListener(
@@ -124,12 +129,12 @@ class TodoItemElement extends HTMLElement {
 				this.classList.remove("dragt");
 				this.dragdrop(data);
 			},
-			{ signal: this.disconnectAbort.signal }
+			{ signal: this.disconnectAbort.signal },
 		);
 		this.addEventListener(
 			"dragstart",
 			(event) => event.dataTransfer.setData(DATA_TRANSFER_TYPE, this.text),
-			{ signal: this.disconnectAbort.signal }
+			{ signal: this.disconnectAbort.signal },
 		);
 
 		this.setAttribute("draggable", "true");
@@ -139,7 +144,7 @@ class TodoItemElement extends HTMLElement {
 			() => {
 				this.remove();
 			},
-			this.disconnectAbort.signal
+			this.disconnectAbort.signal,
 		);
 		globalEvent.on(
 			"removechecked",
@@ -149,7 +154,7 @@ class TodoItemElement extends HTMLElement {
 					this.remove();
 				}
 			},
-			this.disconnectAbort.signal
+			this.disconnectAbort.signal,
 		);
 		globalEvent.on(
 			"removetodo",
@@ -158,7 +163,7 @@ class TodoItemElement extends HTMLElement {
 					this.remove();
 				}
 			},
-			this.disconnectAbort.signal
+			this.disconnectAbort.signal,
 		);
 		globalEvent.emit("toast", `connecting todo ${this.text}`);
 		this.createUserInterface();
@@ -198,7 +203,7 @@ class TodoItemElement extends HTMLElement {
 				},
 				tabindex: 0,
 			},
-			this.text
+			this.text,
 		);
 		this.checkelem = h("input", {
 			type: "checkbox",
@@ -218,7 +223,7 @@ class TodoItemElement extends HTMLElement {
 						click: this.btnUpDownClick.bind(this, true),
 					},
 				},
-				"↑"
+				"↑",
 			),
 			h(
 				"button",
@@ -228,10 +233,10 @@ class TodoItemElement extends HTMLElement {
 						click: this.btnUpDownClick.bind(this, false),
 					},
 				},
-				"↓"
+				"↓",
 			),
 			this.checkelem,
-			this.textelem
+			this.textelem,
 		);
 	}
 	dragdrop(todon) {
@@ -243,14 +248,19 @@ class TodoItemElement extends HTMLElement {
 		const thisClassName = updown ? "moveup" : "movedown";
 		const animationTargetClassName = updown ? "movedown" : "moveup";
 		this.classList.add(thisClassName);
-		const animationTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 1)];
+		const animationTarget =
+			todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 1)];
 		animationTarget?.classList.add(animationTargetClassName);
 		await delay(reduceanim ? 0 : 500);
 		this.classList.remove(thisClassName);
 		animationTarget?.classList.remove(animationTargetClassName);
-		const moveTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 2)];
+		const moveTarget =
+			todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 2)];
 		todoElement.insertBefore(this, moveTarget);
-		globalEvent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
+		globalEvent.emit(
+			"toast",
+			`moving todo ${this.text}${updown ? " up" : " down"}`,
+		);
 	}
 
 	get text() {
@@ -301,7 +311,7 @@ class TodoItemElement extends HTMLElement {
 				if (this.checkelem) {
 					this.checkelem.checked = this.done;
 				}
-				globalEvent.emit("todoDoneStateChange", this.text,this.done);
+				globalEvent.emit("todoDoneStateChange", this.text, this.done);
 				break;
 		}
 		globalEvent.emit("toast", `todo ${this.text} attribute ${name} changed`);
@@ -344,10 +354,10 @@ globalEvent.on("addtodo", (event) => {
 	todoElement.append(inselem);
 });
 globalEvent.on("removetodo", (event) => {
-	console.log(event,"removed")
+	console.log(event, "removed");
 });
-globalEvent.on("todoDoneStateChange", (todoName,value) => {
-	console.log(todoName,value,"donestatechange")
+globalEvent.on("todoDoneStateChange", (todoName, value) => {
+	console.log(todoName, value, "donestatechange");
 });
 globalEvent.on("renametodo", (event) => {
 	if (todoElement.todos.some((l) => event.after == l.text).length > 1) {
