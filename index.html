@@ -1,27 +1,27 @@
 <!doctype html>
 <html lang="ja">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>UI Animation (WC implementation)</title>
-		<link rel="stylesheet" href="index.css" />
-		<script src="index.js" defer></script>
-	</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UI Animation (WC implementation)</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="index.js" defer></script>
+  </head>
 
-	<body>
-		<main>
-			<h1>Todo with animation in WC</h1>
-			<p>a simple event-based todo app.</p>
-			<label>add:<input id="textinelem" /></label>
-			<todo-list id="todo">
-				<todo-item text="this is todo.">this is todo.</todo-item>
-				<todo-item text="let's move." done="true">let's move.</todo-item>
-			</todo-list>
-		</main>
-		<div id="toast"></div>
-		<footer>
-			<button type="button" id="clearchecked">Clear checked</button>
-			<button type="button" id="clearall">Clear all</button>
-		</footer>
-	</body>
+  <body>
+    <main>
+      <h1>Todo with animation in WC</h1>
+      <p>a simple event-based todo app.</p>
+      <label>add:<input id="textinelem" /></label>
+      <todo-list id="todo">
+        <todo-item text="this is todo.">this is todo.</todo-item>
+        <todo-item text="let's move." done="true">let's move.</todo-item>
+      </todo-list>
+    </main>
+    <div id="toast"></div>
+    <footer>
+      <button type="button" id="clearchecked">Clear checked</button>
+      <button type="button" id="clearall">Clear all</button>
+    </footer>
+  </body>
 </html>

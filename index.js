@@ -1,369 +1,359 @@
 "use strict";
 function h(tagName, attributes = {}, ...childrens) {
-	var element = document.createElement(tagName);
-	for (const [attributeName, attributeData] of Object.entries(attributes)) {
-		if ("listeners" == attributeName) {
-			for (const [eventName, eventListener] of Object.entries(attributeData)) {
-				element.addEventListener(eventName, eventListener);
-			}
-		} else if (attributeData !== null) {
-			element.setAttribute(attributeName, attributeData);
-		}
-	}
-	element.append(...childrens);
-	return element;
+  var element = document.createElement(tagName);
+  for (const [attributeName, attributeData] of Object.entries(attributes)) {
+    if ("listeners" == attributeName) {
+      for (const [eventName, eventListener] of Object.entries(attributeData)) {
+        element.addEventListener(eventName, eventListener);
+      }
+    } else if (attributeData !== null) {
+      element.setAttribute(attributeName, attributeData);
+    }
+  }
+  element.append(...childrens);
+  return element;
 }
 
 class MyEventEmitter {
-	constructor() {
-		this.listeners = {};
-	}
+  constructor() {
+    this.listeners = {};
+  }
 
-	on(event, listener, signal) {
-		console.log("on");
-		if (!this.listeners[event]) {
-			this.listeners[event] = [];
-		}
-		this.listeners[event].push(listener);
-		signal?.addEventListener("abort", () => {
-			console.log("off");
-			this.off(event, listener);
-		});
-	}
+  on(event, listener, signal) {
+    console.log("on");
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(listener);
+    signal?.addEventListener("abort", () => {
+      console.log("off");
+      this.off(event, listener);
+    });
+  }
 
-	emit(event, ...args) {
-		const listeners = this.listeners[event] || [];
-		listeners.forEach((listener) => {
-			listener(...args);
-		});
-	}
+  emit(event, ...args) {
+    const listeners = this.listeners[event] || [];
+    listeners.forEach((listener) => {
+      listener(...args);
+    });
+  }
 
-	off(event, listenerToRemove) {
-		this.listeners[event].splice(
-			this.listeners[event].indexOf(listenerToRemove),
-			1,
-		);
-	}
+  off(event, listenerToRemove) {
+    this.listeners[event].splice(this.listeners[event].indexOf(listenerToRemove), 1);
+  }
 }
 
 const globalEvent = new MyEventEmitter();
 globalEvent.on("toast", (event) => {
-	console.log(event);
-	toast.append(h("toast-item", {}, event));
+  console.log(event);
+  toast.append(h("toast-item", {}, event));
 });
 
 const todoElement = document.getElementById("todo");
 const toast = document.getElementById("toast");
-const reduceanim = window.matchMedia(
-	`(prefers-reduced-motion: reduce)`,
-)?.matches;
+const reduceanim = window.matchMedia(`(prefers-reduced-motion: reduce)`)?.matches;
 document.getElementById("textinelem").addEventListener("keydown", (event) => {
-	if (event.key == "Enter") {
-		event.preventDefault();
-		globalEvent.emit("addtodo", event.currentTarget.value);
-		event.currentTarget.value = "";
-	}
+  if (event.key == "Enter") {
+    event.preventDefault();
+    globalEvent.emit("addtodo", event.currentTarget.value);
+    event.currentTarget.value = "";
+  }
 });
 document.getElementById("clearall").addEventListener("click", () => {
-	window.scrollTo({ top: 0 });
-	globalEvent.emit("allclear");
+  window.scrollTo({ top: 0 });
+  globalEvent.emit("allclear");
 });
 document.getElementById("clearchecked").addEventListener("click", () => {
-	globalEvent.emit("removechecked");
+  globalEvent.emit("removechecked");
 });
 
 function delay(timems) {
-	if (timems == 0) {
-		return;
-	}
-	return new Promise((resolve, reject) => setTimeout(resolve, timems));
+  if (timems == 0) {
+    return;
+  }
+  return new Promise((resolve, reject) => setTimeout(resolve, timems));
 }
 
 class TodoListElement extends HTMLElement {
-	constructor() {
-		super();
-	}
-	get todos() {
-		return Array.from(this.children);
-	}
+  constructor() {
+    super();
+  }
+  get todos() {
+    return Array.from(this.children);
+  }
 }
 customElements.define("todo-list", TodoListElement);
 
 class TodoItemElement extends HTMLElement {
-	static observedAttributes = ["text", "done"];
-	constructor() {
-		super();
-	}
-	connectedCallback() {
-		this.disconnectAbort = new AbortController();
+  static observedAttributes = ["text", "done"];
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    this.disconnectAbort = new AbortController();
 
-		this.addEventListener(
-			"dragenter",
-			(event) => {
-				event.preventDefault();
-				this.classList.add("dragt");
-			},
-			{ signal: this.disconnectAbort.signal },
-		);
-		this.addEventListener(
-			"dragover",
-			(event) => {
-				event.preventDefault();
-			},
-			{ signal: this.disconnectAbort.signal },
-		);
-		this.addEventListener(
-			"dragleave",
-			(event) => {
-				event.preventDefault();
-				this.classList.remove("dragt");
-			},
-			{ signal: this.disconnectAbort.signal },
-		);
-		const DATA_TRANSFER_TYPE = "text/plain";
-		this.addEventListener(
-			"drop",
-			(event) => {
-				event.preventDefault();
-				const data = event.dataTransfer.getData(DATA_TRANSFER_TYPE);
-				this.classList.remove("dragt");
-				this.dragdrop(data);
-			},
-			{ signal: this.disconnectAbort.signal },
-		);
-		this.addEventListener(
-			"dragstart",
-			(event) => event.dataTransfer.setData(DATA_TRANSFER_TYPE, this.text),
-			{ signal: this.disconnectAbort.signal },
-		);
+    this.addEventListener(
+      "dragenter",
+      (event) => {
+        event.preventDefault();
+        this.classList.add("dragt");
+      },
+      { signal: this.disconnectAbort.signal },
+    );
+    this.addEventListener(
+      "dragover",
+      (event) => {
+        event.preventDefault();
+      },
+      { signal: this.disconnectAbort.signal },
+    );
+    this.addEventListener(
+      "dragleave",
+      (event) => {
+        event.preventDefault();
+        this.classList.remove("dragt");
+      },
+      { signal: this.disconnectAbort.signal },
+    );
+    const DATA_TRANSFER_TYPE = "text/plain";
+    this.addEventListener(
+      "drop",
+      (event) => {
+        event.preventDefault();
+        const data = event.dataTransfer.getData(DATA_TRANSFER_TYPE);
+        this.classList.remove("dragt");
+        this.dragdrop(data);
+      },
+      { signal: this.disconnectAbort.signal },
+    );
+    this.addEventListener(
+      "dragstart",
+      (event) => event.dataTransfer.setData(DATA_TRANSFER_TYPE, this.text),
+      { signal: this.disconnectAbort.signal },
+    );
 
-		this.setAttribute("draggable", "true");
+    this.setAttribute("draggable", "true");
 
-		globalEvent.on(
-			"allclear",
-			() => {
-				this.remove();
-			},
-			this.disconnectAbort.signal,
-		);
-		globalEvent.on(
-			"removechecked",
-			() => {
-				console.log(`removechecked in "${this.text}" done:${this.done}`);
-				if (this.done) {
-					this.remove();
-				}
-			},
-			this.disconnectAbort.signal,
-		);
-		globalEvent.on(
-			"removetodo",
-			(event) => {
-				if (event == this.text) {
-					this.remove();
-				}
-			},
-			this.disconnectAbort.signal,
-		);
-		globalEvent.emit("toast", `connecting todo ${this.text}`);
-		this.createUserInterface();
-	}
-	createUserInterface() {
-		this.innerHTML = "";
-		this.textelem = h(
-			"span",
-			{
-				listeners: {
-					click: () => {
-						const after = prompt("new todo", this.text);
-						if (after == this.text || after == null) {
-							return;
-						}
-						if (after == "") {
-							globalEvent.emit("removetodo", this.text);
+    globalEvent.on(
+      "allclear",
+      () => {
+        this.remove();
+      },
+      this.disconnectAbort.signal,
+    );
+    globalEvent.on(
+      "removechecked",
+      () => {
+        console.log(`removechecked in "${this.text}" done:${this.done}`);
+        if (this.done) {
+          this.remove();
+        }
+      },
+      this.disconnectAbort.signal,
+    );
+    globalEvent.on(
+      "removetodo",
+      (event) => {
+        if (event == this.text) {
+          this.remove();
+        }
+      },
+      this.disconnectAbort.signal,
+    );
+    globalEvent.emit("toast", `connecting todo ${this.text}`);
+    this.createUserInterface();
+  }
+  createUserInterface() {
+    this.innerHTML = "";
+    this.textelem = h(
+      "span",
+      {
+        listeners: {
+          click: () => {
+            const after = prompt("new todo", this.text);
+            if (after == this.text || after == null) {
+              return;
+            }
+            if (after == "") {
+              globalEvent.emit("removetodo", this.text);
 
-							return;
-						}
-						this.text = after;
-					},
-					keydown: (event) => {
-						if (event.key == "Enter") {
-							event.preventDefault();
-							const after = prompt("new todo", this.text);
-							if (after == this.text || after == null) {
-								return;
-							}
-							if (after == "") {
-								globalEvent.emit("removetodo", this.text);
-								return;
-							}
-							this.text = after;
-						}
-					},
-				},
-				tabindex: 0,
-			},
-			this.text,
-		);
-		this.checkelem = h("input", {
-			type: "checkbox",
-			listeners: {
-				change: (event) => {
-					this.done = event.target.checked;
-				},
-			},
-			checked: this.done ? "on" : null,
-		});
-		this.append(
-			h(
-				"button",
-				{
-					type: "button",
-					listeners: {
-						click: this.btnUpDownClick.bind(this, true),
-					},
-				},
-				"↑",
-			),
-			h(
-				"button",
-				{
-					type: "button",
-					listeners: {
-						click: this.btnUpDownClick.bind(this, false),
-					},
-				},
-				"↓",
-			),
-			this.checkelem,
-			this.textelem,
-		);
-	}
-	dragdrop(todon) {
-		const moveTarget = todoElement.todos.find((event) => event.text == todon);
-		todoElement.insertBefore(moveTarget, this);
-		globalEvent.emit("toast", `moving todo ${todon} to before ${this.text}`);
-	}
-	async btnUpDownClick(updown) {
-		const thisClassName = updown ? "moveup" : "movedown";
-		const animationTargetClassName = updown ? "movedown" : "moveup";
-		this.classList.add(thisClassName);
-		const animationTarget =
-			todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 1)];
-		animationTarget?.classList.add(animationTargetClassName);
-		await delay(reduceanim ? 0 : 500);
-		this.classList.remove(thisClassName);
-		animationTarget?.classList.remove(animationTargetClassName);
-		const moveTarget =
-			todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 2)];
-		todoElement.insertBefore(this, moveTarget);
-		globalEvent.emit(
-			"toast",
-			`moving todo ${this.text}${updown ? " up" : " down"}`,
-		);
-	}
+              return;
+            }
+            this.text = after;
+          },
+          keydown: (event) => {
+            if (event.key == "Enter") {
+              event.preventDefault();
+              const after = prompt("new todo", this.text);
+              if (after == this.text || after == null) {
+                return;
+              }
+              if (after == "") {
+                globalEvent.emit("removetodo", this.text);
+                return;
+              }
+              this.text = after;
+            }
+          },
+        },
+        tabindex: 0,
+      },
+      this.text,
+    );
+    this.checkelem = h("input", {
+      type: "checkbox",
+      listeners: {
+        change: (event) => {
+          this.done = event.target.checked;
+        },
+      },
+      checked: this.done ? "on" : null,
+    });
+    this.append(
+      h(
+        "button",
+        {
+          type: "button",
+          listeners: {
+            click: this.btnUpDownClick.bind(this, true),
+          },
+        },
+        "↑",
+      ),
+      h(
+        "button",
+        {
+          type: "button",
+          listeners: {
+            click: this.btnUpDownClick.bind(this, false),
+          },
+        },
+        "↓",
+      ),
+      this.checkelem,
+      this.textelem,
+    );
+  }
+  dragdrop(todon) {
+    const moveTarget = todoElement.todos.find((event) => event.text == todon);
+    todoElement.insertBefore(moveTarget, this);
+    globalEvent.emit("toast", `moving todo ${todon} to before ${this.text}`);
+  }
+  async btnUpDownClick(updown) {
+    const thisClassName = updown ? "moveup" : "movedown";
+    const animationTargetClassName = updown ? "movedown" : "moveup";
+    this.classList.add(thisClassName);
+    const animationTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 1)];
+    animationTarget?.classList.add(animationTargetClassName);
+    await delay(reduceanim ? 0 : 500);
+    this.classList.remove(thisClassName);
+    animationTarget?.classList.remove(animationTargetClassName);
+    const moveTarget = todoElement.todos[todoElement.todos.indexOf(this) + (updown ? -1 : 2)];
+    todoElement.insertBefore(this, moveTarget);
+    globalEvent.emit("toast", `moving todo ${this.text}${updown ? " up" : " down"}`);
+  }
 
-	get text() {
-		return this.getAttribute("text");
-	}
+  get text() {
+    return this.getAttribute("text");
+  }
 
-	set text(text) {
-		this.setAttribute("text", text);
-	}
+  set text(text) {
+    this.setAttribute("text", text);
+  }
 
-	get done() {
-		return this.getAttribute("done") == "true";
-	}
+  get done() {
+    return this.getAttribute("done") == "true";
+  }
 
-	set done(done) {
-		this.setAttribute("done", done);
-	}
+  set done(done) {
+    this.setAttribute("done", done);
+  }
 
-	async insert() {
-		this.classList.add("insert");
-		await delay(reduceanim ? 0 : 500);
-		this.classList.remove("insert");
-	}
+  async insert() {
+    this.classList.add("insert");
+    await delay(reduceanim ? 0 : 500);
+    this.classList.remove("insert");
+  }
 
-	async remove() {
-		globalEvent.emit("toast", `removing todo ${this.text}`);
-		this.classList.add("remove");
-		await delay(reduceanim ? 0 : 500);
-		super.remove();
-	}
+  async remove() {
+    globalEvent.emit("toast", `removing todo ${this.text}`);
+    this.classList.add("remove");
+    await delay(reduceanim ? 0 : 500);
+    super.remove();
+  }
 
-	attributeChangedCallback(name, oldValue, newValue) {
-		switch (name) {
-			case "text":
-				if (this.textelem) {
-					this.textelem.innerText = newValue;
-					globalEvent.emit("renametodo", {
-						before: oldValue,
-						after: newValue,
-						okcb: () => {},
-						failcb: () => {
-							this.text = oldValue;
-						},
-					});
-				}
-				break;
-			case "done":
-				if (this.checkelem) {
-					this.checkelem.checked = this.done;
-				}
-				globalEvent.emit("todoDoneStateChange", this.text, this.done);
-				break;
-		}
-		globalEvent.emit("toast", `todo ${this.text} attribute ${name} changed`);
-	}
-	disconnectedCallback() {
-		this.disconnectAbort.abort();
-		globalEvent.emit("toast", `disconnected todo ${this.text}`);
-	}
+  attributeChangedCallback(name, oldValue, newValue) {
+    switch (name) {
+      case "text":
+        if (this.textelem) {
+          this.textelem.innerText = newValue;
+          globalEvent.emit("renametodo", {
+            before: oldValue,
+            after: newValue,
+            okcb: () => {},
+            failcb: () => {
+              this.text = oldValue;
+            },
+          });
+        }
+        break;
+      case "done":
+        if (this.checkelem) {
+          this.checkelem.checked = this.done;
+        }
+        globalEvent.emit("todoDoneStateChange", this.text, this.done);
+        break;
+    }
+    globalEvent.emit("toast", `todo ${this.text} attribute ${name} changed`);
+  }
+  disconnectedCallback() {
+    this.disconnectAbort.abort();
+    globalEvent.emit("toast", `disconnected todo ${this.text}`);
+  }
 }
 customElements.define("todo-item", TodoItemElement);
 class ToastItemElement extends HTMLElement {
-	constructor() {
-		super();
-	}
-	connectedCallback() {
-		setTimeout(this.remove.bind(this), 1000);
-		this.insert();
-	}
-	async insert() {
-		this.classList.add("insert");
-		await delay(reduceanim ? 0 : 500);
-		this.classList.remove("insert");
-	}
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    setTimeout(this.remove.bind(this), 1000);
+    this.insert();
+  }
+  async insert() {
+    this.classList.add("insert");
+    await delay(reduceanim ? 0 : 500);
+    this.classList.remove("insert");
+  }
 
-	async remove() {
-		this.classList.add("remove");
-		await delay(reduceanim ? 0 : 500);
-		super.remove();
-	}
+  async remove() {
+    this.classList.add("remove");
+    await delay(reduceanim ? 0 : 500);
+    super.remove();
+  }
 }
 customElements.define("toast-item", ToastItemElement);
 
 globalEvent.on("addtodo", (event) => {
-	if (todoElement.todos.some((todoItem) => todoItem.text == event)) {
-		globalEvent.emit("toast", `error: todo ${event} exists`);
-		throw "todo exists";
-	}
-	const inselem = h("todo-item", { text: event });
-	inselem.insert();
-	todoElement.append(inselem);
+  if (todoElement.todos.some((todoItem) => todoItem.text == event)) {
+    globalEvent.emit("toast", `error: todo ${event} exists`);
+    throw "todo exists";
+  }
+  const inselem = h("todo-item", { text: event });
+  inselem.insert();
+  todoElement.append(inselem);
 });
 globalEvent.on("removetodo", (event) => {
-	console.log(event, "removed");
+  console.log(event, "removed");
 });
 globalEvent.on("todoDoneStateChange", (todoName, value) => {
-	console.log(todoName, value, "donestatechange");
+  console.log(todoName, value, "donestatechange");
 });
 globalEvent.on("renametodo", (event) => {
-	if (todoElement.todos.some((l) => event.after == l.text).length > 1) {
-		globalEvent.emit("toast", `error: todo ${event.after} exists`);
-		event.failcb();
-		throw "todo exists";
-	}
-	event.okcb();
+  if (todoElement.todos.some((l) => event.after == l.text).length > 1) {
+    globalEvent.emit("toast", `error: todo ${event.after} exists`);
+    event.failcb();
+    throw "todo exists";
+  }
+  event.okcb();
 });

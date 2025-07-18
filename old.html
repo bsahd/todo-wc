@@ -1,118 +1,113 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
-	</head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
 
-	<body>
-		<div class="dialog" id="dialog">
-			こんにちは。
-			<button type="button" id="closeBtn">OK</button>
-		</div>
-		<div class="item">alice</div>
-		<div class="item" id="insertBefore">bob</div>
-		<div class="item">carol</div>
-		<style>
-			.dialog {
-				position: fixed;
-				top: 50%;
-				left: 50%;
-				transform: translate(-50%, -50%);
-				width: 300px;
-				padding: 20px;
-				background: #fff4;
-				border-radius: 16px;
-				backdrop-filter: blur(4px);
-				box-shadow: 0 2px 15px rgba(0, 0, 0, 0.25);
-			}
+  <body>
+    <div class="dialog" id="dialog">
+      こんにちは。
+      <button type="button" id="closeBtn">OK</button>
+    </div>
+    <div class="item">alice</div>
+    <div class="item" id="insertBefore">bob</div>
+    <div class="item">carol</div>
+    <style>
+      .dialog {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        padding: 20px;
+        background: #fff4;
+        border-radius: 16px;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.25);
+      }
 
-			.dialog.show {
-				animation: 500ms ease-in 0s 1 dialogclose reverse;
-				pointer-events: none;
-			}
+      .dialog.show {
+        animation: 500ms ease-in 0s 1 dialogclose reverse;
+        pointer-events: none;
+      }
 
-			@keyframes dialogclose {
-				0% {
-					transform: translate(-50%, -50%);
-					/* opacity: 1; */
-					filter: blur(0);
-				}
-				50% {
-					opacity: 1;
-				}
-				100% {
-					transform: translate(-50%, -75%) scale(0.75);
-					opacity: 0;
-					filter: blur(8px);
-				}
-			}
-			@keyframes insert {
-				0% {
-					height: 0;
-					opacity: 0;
-					filter: blur(4px);
-				}
-				100% {
-					height: 1lh;
-					opacity: 1;
-					filter: none;
-				}
-			}
-			.item.insert {
-				animation: 1s ease 0s 1 insert normal;
-			}
-			.item.remove {
-				animation: 1s ease 0s 1 insert reverse;
-				height: 0;
-				opacity: 0;
-			}
+      @keyframes dialogclose {
+        0% {
+          transform: translate(-50%, -50%);
+          /* opacity: 1; */
+          filter: blur(0);
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -75%) scale(0.75);
+          opacity: 0;
+          filter: blur(8px);
+        }
+      }
+      @keyframes insert {
+        0% {
+          height: 0;
+          opacity: 0;
+          filter: blur(4px);
+        }
+        100% {
+          height: 1lh;
+          opacity: 1;
+          filter: none;
+        }
+      }
+      .item.insert {
+        animation: 1s ease 0s 1 insert normal;
+      }
+      .item.remove {
+        animation: 1s ease 0s 1 insert reverse;
+        height: 0;
+        opacity: 0;
+      }
 
-			.dialog.hide {
-				animation: 500ms ease-out 0s 1 dialogclose normal;
-				pointer-events: none;
-			}
-		</style>
-		<script>
-			const dialog = document.getElementById("dialog");
-			document
-				.getElementById("closeBtn")
-				.addEventListener("click", function () {
-					dialog.classList.add("hide");
+      .dialog.hide {
+        animation: 500ms ease-out 0s 1 dialogclose normal;
+        pointer-events: none;
+      }
+    </style>
+    <script>
+      const dialog = document.getElementById("dialog");
+      document.getElementById("closeBtn").addEventListener("click", function () {
+        dialog.classList.add("hide");
 
-					setTimeout(() => {
-						dialog.style.display = "none"; // 完全に非表示にする
-						dialog.classList.remove("hide");
-						setTimeout(showDialog, 1000);
-					}, 500);
-				});
-			function showDialog() {
-				dialog.classList.add("show");
-				dialog.style.display = "block";
-				setTimeout(() => {
-					dialog.classList.remove("show");
-				}, 500);
-			}
-			const inselem = document.createElement("div");
-			inselem.classList.add("item");
-			inselem.classList.add("insert");
-			inselem.innerText = "dave";
-			setTimeout(() => {
-				document.body.insertBefore(
-					inselem,
-					document.getElementById("insertBefore"),
-				);
-				setTimeout(() => {
-					inselem.classList.remove("insert");
-					setTimeout(() => {
-						document.getElementById("insertBefore").classList.add("remove");
-						setTimeout(() => {
-							document.getElementById("insertBefore").remove();
-						}, 1000);
-					}, 1000);
-				}, 1000);
-			}, 1000);
-		</script>
-	</body>
+        setTimeout(() => {
+          dialog.style.display = "none"; // 完全に非表示にする
+          dialog.classList.remove("hide");
+          setTimeout(showDialog, 1000);
+        }, 500);
+      });
+      function showDialog() {
+        dialog.classList.add("show");
+        dialog.style.display = "block";
+        setTimeout(() => {
+          dialog.classList.remove("show");
+        }, 500);
+      }
+      const inselem = document.createElement("div");
+      inselem.classList.add("item");
+      inselem.classList.add("insert");
+      inselem.innerText = "dave";
+      setTimeout(() => {
+        document.body.insertBefore(inselem, document.getElementById("insertBefore"));
+        setTimeout(() => {
+          inselem.classList.remove("insert");
+          setTimeout(() => {
+            document.getElementById("insertBefore").classList.add("remove");
+            setTimeout(() => {
+              document.getElementById("insertBefore").remove();
+            }, 1000);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    </script>
+  </body>
 </html>
